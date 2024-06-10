@@ -1,11 +1,30 @@
 from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
-app = FastAPI()
 
 class UserInput(BaseModel):
     user_input: str
+
+
+VECTOR_INDEX = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global VECTOR_INDEX
+    VECTOR_INDEX = load_vector_db()
+    yield
+
+    # Shut down code goes here
+    print("Shut Down")
+
+
+app = FastAPI(lifespan=lifespan)
+
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the API. Please use the POST method to get responses."}
 
 
 @app.post("/")
@@ -28,7 +47,6 @@ from config import db_path, collection_name, persist_dir, EMBEDDING_MODEL
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from llama_index.core import PromptTemplate
-from config import TEXT_GENERATION_ARGS
 
 def load_vector_db():
     embed_model = HuggingFaceEmbedding(model_name=EMBEDDING_MODEL,trust_remote_code=True)
@@ -53,7 +71,6 @@ def load_vector_db():
 
 def generate_answer(question, num_of_context=5)->str:
     question = question.replace('"',"'")
-    VECTOR_INDEX = load_vector_db()
     retriever = VECTOR_INDEX.as_retriever(similarity_top_k=num_of_context)
     retrieved_nodes = retriever.retrieve(question)
 

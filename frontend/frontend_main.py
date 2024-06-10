@@ -1,3 +1,4 @@
+import requests
 import streamlit as st
 
 
@@ -16,9 +17,13 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 
-# Give response to user input
-def respond_to_user_input(user_input: str) -> str:
-    return f"Echo: {user_input}"
+# Function to get response from the backend
+def get_response_from_backend(user_input: str) -> str:
+    response = requests.post("http://127.0.0.1:8000", json={"user_input": user_input})
+    if response.status_code == 200:
+        return response.json().get("response", "Error: No response from backend")
+    else:
+        return "Error: Failed to connect to backend"
 
 # React to user input
 if prompt := st.chat_input("What is up?"):
@@ -27,7 +32,7 @@ if prompt := st.chat_input("What is up?"):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    response = respond_to_user_input(prompt)
+    response = get_response_from_backend(prompt)
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         st.markdown(response)

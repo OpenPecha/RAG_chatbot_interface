@@ -108,7 +108,3 @@ def generate_answer(question, num_of_context=5)->str:
     # answer = output[0]['generated_text']
     return context[:200]
 
-
-if __name__ == "__main__":
-    answer = generate_answer("What is the meaning of life?")
-    print(answer)

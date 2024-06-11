@@ -99,7 +99,7 @@ def generate_answer(question, num_of_context=5)->str:
     """
 
     qa_template = PromptTemplate(template)
-    prompt = qa_template.format(context_str=context, question_str=question)
+    prompt = qa_template.format(context=context, question=question)
     
     messages = [
         {"role": "user", "content": prompt},

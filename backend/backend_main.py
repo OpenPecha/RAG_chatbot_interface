@@ -92,9 +92,9 @@ def generate_answer(question, num_of_context=5)->str:
     - If you do not have a proper answer from the context, respond with "I dont have enough data to provide an answer."
     - Do not give a response longer than 3000 tokens.
     
-    
-    Contexts: {context}
     Question: {question}
+    Contexts: {context}
+    
     
     """
 

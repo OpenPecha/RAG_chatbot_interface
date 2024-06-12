@@ -40,7 +40,7 @@ if prompt := st.chat_input("What is up?"):
         if answer_references:
             st.markdown("__References__")
             for idx, reference in enumerate(answer_references, start=1):
-                citation = f"{idx}. Book Title: {reference['book_title']}, Page No: {reference['page_no']}, Chapter: {reference['chapter']}"
+                citation = f"_{idx}. Book Title: {reference['book_title']}, Page No: {reference['page_no']}, Chapter: {reference['chapter']}_"
                 st.markdown(citation)
 
     # Add assistant response to chat history

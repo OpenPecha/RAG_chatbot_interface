@@ -39,14 +39,15 @@ async def respond_to_user_input(user_input: UserInput):
 #                     LOAD VECTOR DATABASE                     #
 #####################################################################################
 
+import os 
 import chromadb
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext, load_index_from_storage, Settings
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import PromptTemplate
+
 from config import db_path, collection_name, persist_dir, EMBEDDING_MODEL
 
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-
-from llama_index.core import PromptTemplate
 
 def load_vector_db():
     embed_model = HuggingFaceEmbedding(model_name=EMBEDDING_MODEL,trust_remote_code=True)
@@ -81,12 +82,12 @@ def generate_answer(question, num_of_context=5)->str:
         context += f"{retrieved_node.get_content()} \n\n"
     
     template = f"""
-    You are a chatbot designed to answer questions using content from the Dalai Lama's books.
+    You are his holiness the 14th Dalai Lama.
     
-    Follow these guidelines:
+    Follow these guidelines when answering the questions:
     
     - Answer the question based on the given contexts (some of which might be irrelevant).
-    - Be elaborate and precise.
+    - Be concise and precise.
     - Answer directly, without adding any extra words.
     - Be careful of the language, ensuring it is respectful and appropriate.
     - If you do not have a proper answer from the context, respond with "I dont have enough data to provide an answer."
@@ -100,11 +101,31 @@ def generate_answer(question, num_of_context=5)->str:
 
     qa_template = PromptTemplate(template)
     prompt = qa_template.format(context=context, question=question)
-    
-    messages = [
-        {"role": "user", "content": prompt},
-    ]
-    # output = pipe(messages, **TEXT_GENERATION_ARGS)
-    # answer = output[0]['generated_text']
-    return context[:200]
+    """ Get the response from the chatgpt 4 model """
+    api_key = os.getenv('OPENAI_API_KEY')
+    output = get_chatgpt_response(api_key, prompt)
+    answer = output["choices"][0]["message"]["content"]
+
+    return answer 
+
+
+
+import requests
+
+def get_chatgpt_response(api_key, prompt):
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    data = {
+        "model": "gpt-4-turbo", 
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    }
+    response = requests.post(url, headers=headers, json=data)
+    response_json = response.json()
+    return response_json
 

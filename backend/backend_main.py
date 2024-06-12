@@ -1,4 +1,5 @@
 import os 
+import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
@@ -35,17 +36,26 @@ async def respond_to_user_input(user_input: UserInput):
     response = generate_answer(user_input.user_input)
     return {"response": response}
 
+def get_threshold(similarity_scores)->int:
+    threshold = np.max(similarity_scores) - np.std(similarity_scores) 
+    return threshold
 
-def generate_answer(question, num_of_context=5)->str:
+def generate_answer(question, num_of_context=10)->str:
     question = question.replace('"',"'")
     retriever = VECTOR_INDEX.as_retriever(similarity_top_k=num_of_context)
     retrieved_nodes = retriever.retrieve(question)
 
     context = ""
     
+    similarity_scores = [retrieved_node.score for retrieved_node in retrieved_nodes]
+    threshold = get_threshold(similarity_scores)
+
     for retrieved_node in retrieved_nodes:
+        if retrieved_node.score < threshold:
+            continue
         context += f"{retrieved_node.get_content()} \n\n"
     
+
     template = f"""
     You are his holiness the 14th Dalai Lama.
     
@@ -70,10 +80,6 @@ def generate_answer(question, num_of_context=5)->str:
     api_key = os.getenv('OPENAI_API_KEY')
     output = get_chatgpt_response(api_key, prompt)
     answer = output["choices"][0]["message"]["content"]
-
     return answer 
-
-
-
 
 

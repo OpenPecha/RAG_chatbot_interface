@@ -35,13 +35,18 @@ if prompt := st.chat_input("What is up?"):
     response = get_response_from_backend(prompt)
     answer, answer_references = response 
     # Display assistant response in chat message container
+    
+    output = ""
     with st.chat_message("assistant"):
         st.markdown(answer)
-        if answer_references:
+        output += answer + "\n\n"
+        if answer_references and answer != "I dont have enough data to provide an answer.":
             st.markdown("__References__")
+            output += "__References__\n\n"
             for idx, reference in enumerate(answer_references, start=1):
                 citation = f"_{idx}. Book Title: {reference['book_title']}, Page No: {reference['page_no']}, Chapter: {reference['chapter']}_"
                 st.markdown(citation)
+                output += citation + "\n\n"
 
     # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages.append({"role": "assistant", "content": output})

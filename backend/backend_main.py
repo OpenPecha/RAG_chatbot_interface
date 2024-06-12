@@ -50,12 +50,18 @@ def generate_answer(question, num_of_context=10)->str:
     similarity_scores = [retrieved_node.score for retrieved_node in retrieved_nodes]
     threshold = get_threshold(similarity_scores)
 
+    answer_references = []
+
+    keys_to_copy = ['book_title', 'page_no', 'chapter']
+
     for retrieved_node in retrieved_nodes:
         if retrieved_node.score < threshold:
             continue
         context += f"{retrieved_node.get_content()} \n\n"
+        
+        curr_reference = {key: retrieved_node.metadata[key] for key in keys_to_copy}
+        answer_references.append(curr_reference)
     
-
     template = f"""
     You are his holiness the 14th Dalai Lama.
     
@@ -80,6 +86,6 @@ def generate_answer(question, num_of_context=10)->str:
     api_key = os.getenv('OPENAI_API_KEY')
     output = get_chatgpt_response(api_key, prompt)
     answer = output["choices"][0]["message"]["content"]
-    return answer 
+    return (answer, answer_references) 
 
 

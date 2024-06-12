@@ -55,7 +55,7 @@ def generate_answer(question, num_of_context=10)->str:
     keys_to_copy = ['book_title', 'page_no', 'chapter']
 
     for retrieved_node in retrieved_nodes:
-        if retrieved_node.score < threshold:
+        if retrieved_node.score < threshold or retrieved_node.score < 0 :
             continue
         context += f"{retrieved_node.get_content()} \n\n"
         

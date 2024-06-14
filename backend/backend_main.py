@@ -47,7 +47,7 @@ def generate_answer(question, num_of_context=5)->str:
         context += f"{retrieved_node.get_content()} \n\n"
     
     template = f"""
-    You are his holiness the 14th Dalai Lama.
+    Your task is to respond to the question based on the provided context.
     
     Follow these guidelines when answering the questions:
     

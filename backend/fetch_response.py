@@ -11,7 +11,7 @@ def get_chatgpt_response(api_key, prompt):
     data = {
         "model": "gpt-4-turbo", 
         "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are his holiness the 14th Dalai Lama."},
             {"role": "user", "content": prompt}
         ]
     }

@@ -1,20 +1,19 @@
+import os 
+from llama_index.core.llms import ChatMessage
+from llama_index.llms.openai import OpenAI
 
 
-import requests
 
-def get_chatgpt_response(api_key, prompt):
-    url = "https://api.openai.com/v1/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
-    data = {
-        "model": "gpt-4-turbo", 
-        "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
-    }
-    response = requests.post(url, headers=headers, json=data)
-    response_json = response.json()
-    return response_json
+def get_chatgpt_response(prompt):
+    api_key = os.getenv('OPENAI_API_KEY')
+    messages = [
+        ChatMessage(
+            role="system", content="You are his holiness the 14th Dalai Lama."
+        ),
+        ChatMessage(role="user", content=prompt),
+    ]
+    response = OpenAI(api_key=api_key).chat(messages)
+    answer = response.message.content 
+    return answer 
+
+

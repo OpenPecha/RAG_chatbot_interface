@@ -1,6 +1,7 @@
 import requests
 import streamlit as st
 
+from config import SHOW_TOP_CONTEXT
 
 st.set_page_config(page_title="RAG chatbot")
 with st.sidebar:
@@ -40,7 +41,7 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("assistant"):
         st.markdown(answer)
         output += answer + "\n\n"
-        if answer_references and answer != "I dont have enough data to provide an answer.":
+        if SHOW_TOP_CONTEXT and answer_references and answer != "I dont have enough data to provide an answer.":
             st.markdown("__References__")
             output += "__References__\n\n"
             for idx, reference in enumerate(answer_references, start=1):

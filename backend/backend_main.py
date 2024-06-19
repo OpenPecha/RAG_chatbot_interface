@@ -57,27 +57,52 @@ def generate_answer(question, num_of_context=10)->str:
     for retrieved_node in retrieved_nodes:
         if retrieved_node.score < threshold or retrieved_node.score < 0 :
             continue
-        context += f"{retrieved_node.get_content()} \n\n"
-        
+            
         curr_reference = {key: retrieved_node.metadata[key] for key in keys_to_copy}
         answer_references.append(curr_reference)
-    
+
+        context_metadata = ', '.join([f"{key}: {value}" for key, value in curr_reference.items()])
+        context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
+
     template = f"""
-    You are his holiness the 14th Dalai Lama.
-    
-    Strictly follow these guidelines when answering the questions:
-    
-    - Answer the question based on the given contexts (some of which might be irrelevant).
-    - Give me a short but informative and pleasant answer.
-    - Speak in plain English.
-    - Be careful of the language, ensuring it is respectful and appropriate.
-    - If you do not have a proper answer from the context, only respond with "I dont have enough data to provide an answer."
-    
-    Question: {question}
-    Contexts: {context}
-    
-    
-    """
+        You are his holiness the 14th Dalai Lama.
+        
+        Strictly follow these guidelines when answering the questions:
+        
+        - Answer the question based on the given context (some of which might be irrelevant).
+        - Provide a short, informative, and pleasant response.
+        - Use plain and respectful language.
+        - If there is not enough information in the context to answer the question, respond with "I don't have enough data to provide an answer."
+
+        Question: {question}
+        {context}
+        
+        Your task is divided into two parts:
+        
+        1. **Get the Answer:**
+        - Provide a concise and precise answer to the user's question based on the given context.
+        - If you do not have enough data to provide an answer, respond with "I don't have enough data to provide an answer."
+        
+        2. **Find the Source Snippets:**
+        - Extract and provide all relevant snippets from the context that directly support your answer.
+        - Ensure each snippet retains the exact wording and spelling from the context.
+        - Cite the source of each snippet (e.g., book title, page number, chapter) in italic.
+        - Separate each snippet and its source with a new line.
+        - If you do not have a proper answer from the context, do not include references.
+
+        Structure your response as follows:
+        
+        Answer:
+        your_answer
+        
+        __References__
+        1._source_:snippet_1   
+
+        2._source_:snippet_2   
+        
+        ...
+        """
+
 
     qa_template = PromptTemplate(template)
     prompt = qa_template.format(context=context, question=question)

@@ -7,6 +7,9 @@ from llama_index.core import PromptTemplate
 
 from config import load_vector_db
 from fetch_response import get_chatgpt_response
+
+from log_response import log_rag_chatbot_response
+
 class UserInput(BaseModel):
     user_input: str
 
@@ -34,6 +37,8 @@ async def read_root():
 async def respond_to_user_input(user_input: UserInput):
     # Placeholder response generation logic
     response = generate_answer(user_input.user_input)
+    answer, top_references = response 
+    log_rag_chatbot_response(user_input.user_input, answer)
     return {"response": response}
 
 def get_threshold(similarity_scores)->int:

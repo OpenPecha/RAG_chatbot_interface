@@ -14,8 +14,5 @@ def log_rag_chatbot_response(question:str, response:str):
     """ we will store them separelty in log file"""
     response_parts = response.split("__References__")
     answer, references = response_parts[0], response_parts[1]
-    if answer.startswith("Answer:"):
-        answer = answer.removeprefix("Answer:")
-        
     with open(LOG_FILE_PATH, "a", encoding="utf-8") as file:
         file.write(f"Question: {question},Answer:{answer},References:{references}\n")

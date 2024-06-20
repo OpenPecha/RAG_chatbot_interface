@@ -97,7 +97,6 @@ def generate_answer(question, num_of_context=10)->str:
 
         Structure your response as follows:
         
-        Answer:
         your_answer
         
         __References__

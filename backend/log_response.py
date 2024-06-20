@@ -13,6 +13,7 @@ def log_rag_chatbot_response(question:str, response:str):
     """ response contains both answer and references"""
     """ we will store them separelty in log file"""
     response_parts = response.split("__References__")
-    answer, references = response_parts[0], response_parts[1]
+    answer = response_parts[0]
+    references =  response_parts[1] if len(response_parts) >= 2 else ""
     with open(LOG_FILE_PATH, "a", encoding="utf-8") as file:
         file.write(f"Question: {question},Answer:{answer},References:{references}\n")

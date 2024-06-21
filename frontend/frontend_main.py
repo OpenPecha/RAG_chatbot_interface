@@ -1,6 +1,8 @@
 import requests
 import streamlit as st
 
+from log_response import log_rag_chatbot_response
+
 st.set_page_config(page_title="RAG chatbot")
 with st.sidebar:
     st.title('RAG Chatbot')
@@ -33,6 +35,6 @@ if prompt := st.chat_input("What is up?"):
         response = get_response_from_backend(prompt)
         full_response = st.write_stream(response)
 
-
+    log_rag_chatbot_response(prompt, full_response)
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": full_response})

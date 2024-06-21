@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from llama_index.core import PromptTemplate
 from config import load_vector_db
 from fetch_response import get_chatgpt_response
-from log_response import log_rag_chatbot_response
 from fastapi.responses import StreamingResponse
 
 class UserInput(BaseModel):

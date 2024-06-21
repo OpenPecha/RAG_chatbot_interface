@@ -1,20 +1,19 @@
-import os 
+import os
 import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from llama_index.core import PromptTemplate
-
 from config import load_vector_db
 from fetch_response import get_chatgpt_response
-
 from log_response import log_rag_chatbot_response
+from fastapi.responses import StreamingResponse
 
 class UserInput(BaseModel):
     user_input: str
 
-
 VECTOR_INDEX = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,47 +21,34 @@ async def lifespan(app: FastAPI):
     VECTOR_INDEX = load_vector_db()
     yield
 
-    # Shut down code goes here
-    print("Shut Down")
-
-
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to the API. Please use the POST method to get responses."}
 
-
 @app.post("/")
 async def respond_to_user_input(user_input: UserInput):
-    # Placeholder response generation logic
-    answer = generate_answer(user_input.user_input)
-    log_rag_chatbot_response(user_input.user_input, answer)
-    return {"response": answer}
+    return StreamingResponse(generate_answer(user_input.user_input), media_type="text/event-stream")
 
-def get_threshold(similarity_scores)->int:
-    threshold = np.max(similarity_scores) - np.std(similarity_scores) 
+def get_threshold(similarity_scores) -> int:
+    threshold = np.max(similarity_scores) - np.std(similarity_scores)
     return threshold
 
-def generate_answer(question, num_of_context=10)->str:
-    question = question.replace('"',"'")
+def generate_answer(question, num_of_context=10):
+    question = question.replace('"', "'")
     retriever = VECTOR_INDEX.as_retriever(similarity_top_k=num_of_context)
     retrieved_nodes = retriever.retrieve(question)
 
     context = ""
-    
     similarity_scores = [retrieved_node.score for retrieved_node in retrieved_nodes]
     threshold = get_threshold(similarity_scores)
 
-
     keys_to_copy = ['book_title', 'page_no', 'chapter']
-
     for retrieved_node in retrieved_nodes:
-        if retrieved_node.score < threshold or retrieved_node.score < 0 :
+        if retrieved_node.score < threshold or retrieved_node.score < 0:
             continue
-            
         curr_reference = {key: retrieved_node.metadata[key] for key in keys_to_copy}
-
         context_metadata = ', '.join([f"{key}: {value}" for key, value in curr_reference.items()])
         context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
 
@@ -101,15 +87,10 @@ def generate_answer(question, num_of_context=10)->str:
         2._source_:snippet_2   
         
         ...
-        """
-
-
+    """
+    
     qa_template = PromptTemplate(template)
     prompt = qa_template.format(context=context, question=question)
-    """ Get the response from the chatgpt 4 model """
-    api_key = os.getenv('OPENAI_API_KEY')
-    output = get_chatgpt_response(api_key, prompt)
-    answer = output["choices"][0]["message"]["content"]
-    return answer 
-
-
+    
+    for output in get_chatgpt_response(prompt):
+        yield output 

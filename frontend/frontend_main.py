@@ -16,8 +16,8 @@ for message in st.session_state.messages:
 
 # Function to get response from the backend
 def get_response_from_backend(user_input: str):
-    response = requests.post("http://127.0.0.1:8000", json={"user_input": user_input}, stream=True)
-    return response.iter_lines()
+    for chunk in requests.post("http://127.0.0.1:8000", json={"user_input": user_input}, stream=True):
+        yield chunk.decode("utf-8") 
 
 # React to user input
 if prompt := st.chat_input("What is up?"):
@@ -26,15 +26,13 @@ if prompt := st.chat_input("What is up?"):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    response = get_response_from_backend(prompt)
-    assistant_message = st.chat_message("assistant")
-    response_text = ""
 
-    for line in response:
-        if line:
-            chunk = line.decode('utf-8')
-            response_text += chunk 
-            assistant_message.markdown(chunk)
+    full_response = ""
+
+    with st.chat_message("assistant"):
+        response = get_response_from_backend(prompt)
+        full_response = st.write_stream(response)
+
 
     # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response_text})
+    st.session_state.messages.append({"role": "assistant", "content": full_response})

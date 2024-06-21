@@ -14,6 +14,8 @@ class UserInput(BaseModel):
 
 VECTOR_INDEX = None
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,7 +31,9 @@ async def read_root():
 
 @app.post("/")
 async def respond_to_user_input(user_input: UserInput):
-    return StreamingResponse(generate_answer(user_input.user_input), media_type="text/event-stream")
+    return StreamingResponse(generate_answer(user_input.user_input), media_type='text/plain')
+
+
 
 def get_threshold(similarity_scores) -> int:
     threshold = np.max(similarity_scores) - np.std(similarity_scores)

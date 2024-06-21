@@ -11,7 +11,6 @@ def get_chatgpt_response(prompt):
     )
     for chunk in stream:
         if chunk.choices[0].delta.content is not None:
-            # print(chunk.choices[0].delta.content, end="")
             yield chunk.choices[0].delta.content
 
 

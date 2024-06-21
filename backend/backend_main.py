@@ -83,7 +83,6 @@ def generate_answer(question, num_of_context=10)->str:
         
         1. **Get the Answer:**
         - Provide a concise and precise answer to the user's question based on the given context.
-        - If you do not have enough data to provide an answer, respond with "I don't have enough data to provide an answer."
         
         2. **Find the Source Snippets:**
         - Extract and provide all relevant snippets from the contexts that directly support your answer.
@@ -91,7 +90,6 @@ def generate_answer(question, num_of_context=10)->str:
         - Cite the source of each snippet (e.g., book title, page number, chapter) in italic.
         - Snippet from same source must be shown together.
         - Separate each snippet and its source with a new line.
-        - If you do not have a proper answer from the context, do not include references.
 
         Structure your response as follows:
         

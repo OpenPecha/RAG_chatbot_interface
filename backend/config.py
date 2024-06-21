@@ -4,11 +4,11 @@ from llama_index.core import StorageContext, load_index_from_storage, Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 
-EMBEDDING_MODEL = "Alibaba-NLP/gte-large-en-v1.5"
+EMBEDDING_MODEL = "openpecha/Finetuned_Alibaba_Large"
 
-db_path="./chroma_db"
+db_path="./fine_tunned_context_db"
 collection_name="rag_demo"
-persist_dir="./chroma_db/index"
+persist_dir="./fine_tunned_context_db/index"
 
 def load_vector_db():
     embed_model = HuggingFaceEmbedding(model_name=EMBEDDING_MODEL,trust_remote_code=True)

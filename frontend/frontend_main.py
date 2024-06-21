@@ -1,8 +1,6 @@
 import requests
 import streamlit as st
 
-from config import SHOW_TOP_CONTEXT
-
 st.set_page_config(page_title="RAG chatbot")
 with st.sidebar:
     st.title('RAG Chatbot')
@@ -34,20 +32,8 @@ if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     response = get_response_from_backend(prompt)
-    answer, answer_references = response 
     # Display assistant response in chat message container
-    
-    output = ""
     with st.chat_message("assistant"):
-        st.markdown(answer)
-        output += answer + "\n\n"
-        if SHOW_TOP_CONTEXT and answer_references and answer != "I dont have enough data to provide an answer.":
-            st.markdown("__References__")
-            output += "__References__\n\n"
-            for idx, reference in enumerate(answer_references, start=1):
-                citation = f"_{idx}. Book Title: {reference['book_title']}, Page No: {reference['page_no']}, Chapter: {reference['chapter']}_"
-                st.markdown(citation)
-                output += citation + "\n\n"
-
+        st.markdown(response)
     # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": output})
+    st.session_state.messages.append({"role": "assistant", "content": response})

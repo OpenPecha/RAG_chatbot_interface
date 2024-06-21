@@ -36,10 +36,9 @@ async def read_root():
 @app.post("/")
 async def respond_to_user_input(user_input: UserInput):
     # Placeholder response generation logic
-    response = generate_answer(user_input.user_input)
-    answer, top_references = response 
+    answer = generate_answer(user_input.user_input)
     log_rag_chatbot_response(user_input.user_input, answer)
-    return {"response": response}
+    return {"response": answer}
 
 def get_threshold(similarity_scores)->int:
     threshold = np.max(similarity_scores) - np.std(similarity_scores) 
@@ -55,7 +54,6 @@ def generate_answer(question, num_of_context=10)->str:
     similarity_scores = [retrieved_node.score for retrieved_node in retrieved_nodes]
     threshold = get_threshold(similarity_scores)
 
-    answer_references = []
 
     keys_to_copy = ['book_title', 'page_no', 'chapter']
 
@@ -64,7 +62,6 @@ def generate_answer(question, num_of_context=10)->str:
             continue
             
         curr_reference = {key: retrieved_node.metadata[key] for key in keys_to_copy}
-        answer_references.append(curr_reference)
 
         context_metadata = ', '.join([f"{key}: {value}" for key, value in curr_reference.items()])
         context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
@@ -92,7 +89,7 @@ def generate_answer(question, num_of_context=10)->str:
         - Extract and provide all relevant snippets from the contexts that directly support your answer.
         - Ensure each snippet retains the exact wording and spelling from the context.
         - Cite the source of each snippet (e.g., book title, page number, chapter) in italic.
-        - Snippet from same source be shown together.
+        - Snippet from same source must be shown together.
         - Separate each snippet and its source with a new line.
         - If you do not have a proper answer from the context, do not include references.
 
@@ -115,6 +112,6 @@ def generate_answer(question, num_of_context=10)->str:
     api_key = os.getenv('OPENAI_API_KEY')
     output = get_chatgpt_response(api_key, prompt)
     answer = output["choices"][0]["message"]["content"]
-    return (answer, answer_references) 
+    return answer 
 
 

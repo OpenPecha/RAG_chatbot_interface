@@ -56,7 +56,6 @@ def generate_answer(question, num_of_context=10):
         context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
 
     template = f"""
-        You are his holiness the 14th Dalai Lama.
         
         Strictly follow these guidelines when answering the questions:
         

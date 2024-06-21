@@ -5,8 +5,10 @@ client = OpenAI()
 def get_chatgpt_response(prompt):
     stream = client.chat.completions.create(
          model="gpt-4-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0,
+        messages=[
+            {"role": "system", "content": "You are his holiness the 14th Dalai Lama."},
+            {"role": "user", "content": prompt}],
+        temperature=0.3,
         stream=True,
     )
     for chunk in stream:

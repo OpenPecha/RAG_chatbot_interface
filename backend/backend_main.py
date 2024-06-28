@@ -1,4 +1,3 @@
-import os 
 import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -82,9 +81,7 @@ def generate_answer(question, num_of_context=10)->str:
     qa_template = PromptTemplate(template)
     prompt = qa_template.format(context=context, question=question)
     """ Get the response from the chatgpt 4 model """
-    api_key = os.getenv('OPENAI_API_KEY')
-    output = get_chatgpt_response(api_key, prompt)
-    answer = output["choices"][0]["message"]["content"]
-    return (answer, answer_references) 
+    answer = get_chatgpt_response(prompt)
+    return (answer, answer_references)
 
 

@@ -86,6 +86,7 @@ def generate_answer(question, num_of_context=10):
         __References__
         1._source_:snippet_1   
 
+
         2._source_:snippet_2   
         
         ...

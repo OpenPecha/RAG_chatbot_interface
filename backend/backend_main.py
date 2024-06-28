@@ -3,9 +3,8 @@ import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from llama_index.core import PromptTemplate
 from config import load_vector_db
-from fetch_response import get_chatgpt_response
+from fetch_response import get_answer_for_query
 from fastapi.responses import StreamingResponse
 
 class UserInput(BaseModel):
@@ -38,10 +37,10 @@ def get_threshold(similarity_scores) -> int:
     threshold = np.max(similarity_scores) - np.std(similarity_scores)
     return threshold
 
-def generate_answer(question, num_of_context=10):
-    question = question.replace('"', "'")
+def generate_answer(query:str, num_of_context=10):
+    query = query.replace('"', "'")
     retriever = VECTOR_INDEX.as_retriever(similarity_top_k=num_of_context)
-    retrieved_nodes = retriever.retrieve(question)
+    retrieved_nodes = retriever.retrieve(query)
 
     context = ""
     similarity_scores = [retrieved_node.score for retrieved_node in retrieved_nodes]
@@ -55,45 +54,6 @@ def generate_answer(question, num_of_context=10):
         context_metadata = ', '.join([f"{key}: {value}" for key, value in curr_reference.items()])
         context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
 
-    template = f"""
-        
-        Strictly follow these guidelines when answering the questions:
-        
-        - Answer the question based on the given context (some of which might be irrelevant).
-        - Provide a short, informative, and pleasant response.
-        - Use plain and respectful language.
-        - If there is not enough information in the context to answer the question, respond with "I don't have enough data to provide an answer."
-
-        Question: {question}
-        {context}
-        
-        Your task is divided into two parts:
-        
-        1. **Get the Answer:**
-        - Provide a concise and precise answer to the user's question based on the given context.
-        
-        2. **Find the Source Snippets:**
-        - Extract and provide all relevant snippets from the contexts that directly support your answer.
-        - Ensure each snippet retains the exact wording and spelling from the context.
-        - Cite the source of each snippet (e.g., book title, page number, chapter) in italic.
-        - Snippet from same source must be shown together.
-        - Separate each snippet and its source with a new line.
-
-        Structure your response as follows:
-        
-        your_answer
-        
-        __References__
-        1._source_:snippet_1   
-
-
-        2._source_:snippet_2   
-        
-        ...
-    """
     
-    qa_template = PromptTemplate(template)
-    prompt = qa_template.format(context=context, question=question)
-    
-    for output in get_chatgpt_response(prompt):
+    for output in get_answer_for_query(query=query, context=context):
         yield output 

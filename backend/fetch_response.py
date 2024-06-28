@@ -16,4 +16,3 @@ def get_chatgpt_response(prompt):
     answer = response.message.content 
     return answer 
 
-

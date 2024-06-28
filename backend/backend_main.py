@@ -62,7 +62,7 @@ def generate_answer(question, num_of_context=10)->str:
         answer_references.append(curr_reference)
     
     template = f"""
-    You are his holiness the 14th Dalai Lama.
+    Your task is to respond to the question based on the provided context.
     
     Strictly follow these guidelines when answering the questions:
     

@@ -29,3 +29,13 @@ def load_vector_db():
     """ Load the index from storage """
     VECTOR_INDEX = load_index_from_storage(storage_context)
     return VECTOR_INDEX
+
+
+
+GIBBERISH_QUERY_ANSWER = "It looks like your message is a bit unclear. Could you please rephrase your query so I can better understand and assist you?"
+
+INAPPROPRIATE_QUERY_ANSWER = "Your query contains language that is inappropriate or harmful. Please rephrase your question in a respectful manner. If you have any legitimate questions or need assistance on a relevant topic, feel free to ask."
+
+
+NON_ENGLISH_QUERY_ANSWER = "Please note that we only support queries in English. Kindly rephrase your question in English so we can assist you better."
+    

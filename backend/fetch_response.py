@@ -46,6 +46,17 @@ def get_answer_for_genuine_query(query:str, context:str):
     prompt = qa_template.format(context=context, question=query)
     return get_chatgpt_response(prompt)
     
+def get_answer_for_normal_conversation(normal_conversation:str):
+
+    template = f"""     
+        conversation: {normal_conversation}
+
+        Respond casually and warmly to the query.        
+    """
+    
+    qa_template = PromptTemplate(template)
+    prompt = qa_template.format(normal_conversation=normal_conversation)
+    return get_chatgpt_response(prompt)
 
 def get_chatgpt_response(prompt:str):
     stream = client.chat.completions.create(
@@ -130,4 +141,5 @@ def classify_query(query:str):
     )
     classified_query = response.choices[0].message.content
     return classified_query
+
 

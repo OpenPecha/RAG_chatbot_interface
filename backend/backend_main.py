@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from config import load_vector_db
-from fetch_response import get_answer_for_query, transform_query
+from fetch_response import get_answer_for_genuine_query, transform_query
 from fastapi.responses import StreamingResponse
 from typing import List, Dict
 class UserInput(BaseModel):
@@ -58,5 +58,5 @@ def generate_answer(query:str, older_conversation, num_of_context=10):
         context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
 
     
-    for output in get_answer_for_query(query=query, context=context):
+    for output in get_answer_for_genuine_query(query=query, context=context):
         yield output 

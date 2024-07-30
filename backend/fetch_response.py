@@ -3,7 +3,7 @@ from llama_index.core import PromptTemplate
 from typing import List, Dict 
 client = OpenAI()
 
-def get_answer_for_query(query:str, context:str):
+def get_answer_for_genuine_query(query:str, context:str):
 
     template = f"""
         
@@ -44,7 +44,10 @@ def get_answer_for_query(query:str, context:str):
     
     qa_template = PromptTemplate(template)
     prompt = qa_template.format(context=context, question=query)
+    return get_chatgpt_response(prompt)
     
+
+def get_chatgpt_response(prompt:str):
     stream = client.chat.completions.create(
          model="gpt-4-turbo",
         messages=[
@@ -56,6 +59,7 @@ def get_answer_for_query(query:str, context:str):
     for chunk in stream:
         if chunk.choices[0].delta.content is not None:
             yield chunk.choices[0].delta.content
+
 
 def transform_query(query:str, older_conversation: List[Dict]):
     """

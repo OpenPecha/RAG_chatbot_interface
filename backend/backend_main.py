@@ -3,7 +3,7 @@ import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from config import load_vector_db, GIBBERISH_QUERY_ANSWER, INAPPROPRIATE_QUERY_ANSWER, NON_ENGLISH_QUERY_ANSWER
+from config import load_vector_db, GIBBERISH_QUERY_RESPONSE, INAPPROPRIATE_QUERY_RESPONSE, NON_ENGLISH_QUERY_RESPONSE
 from fetch_response import classify_query, transform_query, get_answer_for_genuine_query,  get_answer_for_normal_conversation 
 from fastapi.responses import StreamingResponse
 from typing import List, Dict
@@ -42,17 +42,17 @@ def generate_answer(query:str, older_conversation, num_of_context=10):
     query = query.replace('"', "'")
     query_category = classify_query(query)
     if query_category == "Gibberish":
-        for answer in GIBBERISH_QUERY_ANSWER:
+        for answer in GIBBERISH_QUERY_RESPONSE:
             yield answer
         return 
 
     if query_category == "Inappropriate":
-        for answer in INAPPROPRIATE_QUERY_ANSWER:
+        for answer in INAPPROPRIATE_QUERY_RESPONSE:
             yield answer
         return 
     
     if query_category == "Non-English":
-        for answer in NON_ENGLISH_QUERY_ANSWER:
+        for answer in NON_ENGLISH_QUERY_RESPONSE:
             yield answer
         return
     

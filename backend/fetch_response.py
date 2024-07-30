@@ -92,3 +92,38 @@ def transform_query(query:str, older_conversation: List[Dict]):
     
 
 
+def classify_query(query:str):
+    
+    template = f"""
+        Query: {query}
+
+        Classifies the query into one of the predefined categories based on its content.
+
+        Categories:
+            - Normal Conversation: Casual greetings not specific to Dalai Lama or Tibet.
+            - Gibberish: Incoherent or nonsensical text.
+            - Genuine Query: Any valid question that seeks information or clarification.
+            - Inappropriate: Queries containing harmful, offensive, derogatory, sexual or otherwise inappropriate language. This includes queries with negative sentiment or illegal content.
+            - Non-English: Queries not written in English.
+
+
+        Returns:
+            str: The exact category of the query from the list above. The category should be returned exactly as mentioned, without any additional characters or quotes.
+
+    """
+    
+    qa_template = PromptTemplate(template)
+    prompt = qa_template.format(question=query)
+    
+    """ include the older conversation to make the model understand the context of the query transformation"""
+    messages=[{"role": "user", "content": prompt}]
+
+    response = client.chat.completions.create(
+         model="gpt-4-turbo",
+        messages=messages,
+        temperature=0.3,
+        
+    )
+    classified_query = response.choices[0].message.content
+    return classified_query
+

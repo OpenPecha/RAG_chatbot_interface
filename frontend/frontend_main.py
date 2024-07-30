@@ -1,5 +1,6 @@
 import requests
 import streamlit as st
+from typing import List, Dict 
 
 from log_response import log_rag_chatbot_response
 
@@ -17,8 +18,8 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Function to get response from the backend
-def get_response_from_backend(user_input: str):
-    for chunk in requests.post("http://127.0.0.1:8000", json={"user_input": user_input}, stream=True):
+def get_response_from_backend(user_input: str, older_conversation: List[Dict]):
+    for chunk in requests.post("http://127.0.0.1:8000", json={"user_input": user_input, "older_conversation":older_conversation}, stream=True):
         yield chunk.decode("utf-8") 
 
 # React to user input
@@ -32,7 +33,7 @@ if prompt := st.chat_input("What is up?"):
     full_response = ""
 
     with st.chat_message("assistant"):
-        response = get_response_from_backend(prompt)
+        response = get_response_from_backend(prompt, st.session_state.messages)
         full_response = st.write_stream(response)
 
     log_rag_chatbot_response(prompt, full_response)

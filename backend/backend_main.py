@@ -4,11 +4,12 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from config import load_vector_db
-from fetch_response import get_answer_for_query
+from fetch_response import get_answer_for_query, transform_query
 from fastapi.responses import StreamingResponse
-
+from typing import List, Dict
 class UserInput(BaseModel):
     user_input: str
+    older_conversation: List[Dict]
 
 VECTOR_INDEX = None
 
@@ -29,7 +30,7 @@ async def read_root():
 
 @app.post("/")
 async def respond_to_user_input(user_input: UserInput):
-    return StreamingResponse(generate_answer(user_input.user_input), media_type='text/plain')
+    return StreamingResponse(generate_answer(user_input.user_input, user_input.older_conversation), media_type='text/plain')
 
 
 
@@ -37,8 +38,10 @@ def get_threshold(similarity_scores) -> int:
     threshold = np.max(similarity_scores) - np.std(similarity_scores)
     return threshold
 
-def generate_answer(query:str, num_of_context=10):
+def generate_answer(query:str, older_conversation, num_of_context=10):
     query = query.replace('"', "'")
+    query = transform_query(query, older_conversation)
+    
     retriever = VECTOR_INDEX.as_retriever(similarity_top_k=num_of_context)
     retrieved_nodes = retriever.retrieve(query)
 

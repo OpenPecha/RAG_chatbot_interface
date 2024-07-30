@@ -57,8 +57,7 @@ def get_answer_for_query(query:str, context:str):
         if chunk.choices[0].delta.content is not None:
             yield chunk.choices[0].delta.content
 
-
-def transform_query(query:str, older_conversation: List[Dict[str,str]]):
+def transform_query(query:str, older_conversation: List[Dict]):
     """
     transforming the query to make it more clear and concise
     Example:
@@ -91,3 +90,5 @@ def transform_query(query:str, older_conversation: List[Dict[str,str]]):
     transformed_query = response.choices[0].message.content
     return transformed_query
     
+
+

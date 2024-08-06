@@ -8,6 +8,29 @@ st.set_page_config(page_title="RAG chatbot")
 with st.sidebar:
     st.title('RAG Chatbot')
 
+# Token usage progress bar
+CHATGPT_TOKEN_LIMIT = 1000
+
+if "messages" not in st.session_state:
+    token_used = 0
+
+else:
+    token_used = 0
+    for message in st.session_state.messages:
+        token_used += len(message["content"].split(" "))
+
+progress = int((token_used/CHATGPT_TOKEN_LIMIT) * 100)
+
+# Create columns for side-by-side layout
+col1, col2 = st.columns([2, 8])  # Adjust the ratio as needed
+
+with col1:
+    st.write("**Token usage**")
+
+with col2:
+    progress_bar = st.progress(progress)
+
+
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []

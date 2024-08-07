@@ -7,6 +7,13 @@ from log_response import log_rag_chatbot_response
 
 CHATGPT_TOKEN_LIMIT = 1000
 
+
+def get_token_used():
+    token_used = 0
+    for message in st.session_state.messages:
+        token_used += len(message["content"].split(" "))
+    return token_used
+
 st.set_page_config(page_title="RAG chatbot")
 with st.sidebar:
     st.title('RAG Chatbot')
@@ -18,9 +25,7 @@ with st.container():
         token_used = 0
 
     else:
-        token_used = 0
-        for message in st.session_state.messages:
-            token_used += len(message["content"].split(" "))
+        token_used = get_token_used()
 
     progress = int((token_used/CHATGPT_TOKEN_LIMIT) * 100)
 
@@ -81,9 +86,7 @@ if prompt := st.chat_input("What is up?"):
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-    token_used = 0
-    for message in st.session_state.messages:
-        token_used += len(message["content"].split(" "))
+    token_used = get_token_used()
 
     progress = int((token_used/CHATGPT_TOKEN_LIMIT) * 100)
     progress_bar.progress(progress)

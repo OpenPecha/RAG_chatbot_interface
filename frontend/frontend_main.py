@@ -8,27 +8,43 @@ st.set_page_config(page_title="RAG chatbot")
 with st.sidebar:
     st.title('RAG Chatbot')
 
-# Token usage progress bar
-CHATGPT_TOKEN_LIMIT = 1000
+with st.container():
+    # Token usage progress bar
+    CHATGPT_TOKEN_LIMIT = 1000
 
-if "messages" not in st.session_state:
-    token_used = 0
+    if "messages" not in st.session_state:
+        token_used = 0
 
-else:
-    token_used = 0
-    for message in st.session_state.messages:
-        token_used += len(message["content"].split(" "))
+    else:
+        token_used = 0
+        for message in st.session_state.messages:
+            token_used += len(message["content"].split(" "))
 
-progress = int((token_used/CHATGPT_TOKEN_LIMIT) * 100)
+    progress = int((token_used/CHATGPT_TOKEN_LIMIT) * 100)
 
-# Create columns for side-by-side layout
-col1, col2 = st.columns([2, 8])  # Adjust the ratio as needed
+    st.write("""<div class='fixed-header'/>""", unsafe_allow_html=True)
+    # Create columns for side-by-side layout
+    col1, col2 = st.columns([2, 8])  # Adjust the ratio as needed
+    with col1:
+        st.write("**Token usage**")
 
-with col1:
-    st.write("**Token usage**")
+    with col2:
+        progress_bar = st.progress(progress)
 
-with col2:
-    progress_bar = st.progress(progress)
+st.markdown(
+    """
+    <style>
+        div[data-testid="stVerticalBlock"] div:has(div.fixed-header) {
+            position: sticky;
+            top: 2.875rem;
+            background-color: white;
+            z-index: 999;
+        }
+        .fixed-header {
+        }
+    </style>
+        """,
+        unsafe_allow_html=True)
 
 
 # Initialize chat history

@@ -1,6 +1,8 @@
 from openai import OpenAI
 from llama_index.core import PromptTemplate
 from typing import List, Dict 
+
+
 client = OpenAI()
 
 def get_answer_for_query(query:str, context:str):
@@ -90,5 +92,6 @@ def transform_query(query:str, older_conversation: List[Dict]):
     transformed_query = response.choices[0].message.content
     return transformed_query
     
+
 
 

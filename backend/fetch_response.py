@@ -5,7 +5,7 @@ from typing import List, Dict
 
 client = OpenAI()
 
-def get_answer_for_query(query:str, context:str):
+def get_answer_for_genuine_query(query:str, context:str):
 
     template = f"""
         
@@ -46,7 +46,21 @@ def get_answer_for_query(query:str, context:str):
     
     qa_template = PromptTemplate(template)
     prompt = qa_template.format(context=context, question=query)
+    return get_chatgpt_response(prompt)
     
+def get_answer_for_normal_conversation(normal_conversation:str):
+
+    template = f"""     
+        conversation: {normal_conversation}
+
+        Respond casually and warmly to the query.        
+    """
+    
+    qa_template = PromptTemplate(template)
+    prompt = qa_template.format(normal_conversation=normal_conversation)
+    return get_chatgpt_response(prompt)
+
+def get_chatgpt_response(prompt:str):
     stream = client.chat.completions.create(
          model="gpt-4-turbo",
         messages=[
@@ -58,6 +72,7 @@ def get_answer_for_query(query:str, context:str):
     for chunk in stream:
         if chunk.choices[0].delta.content is not None:
             yield chunk.choices[0].delta.content
+
 
 def transform_query(query:str, older_conversation: List[Dict]):
     """
@@ -92,6 +107,42 @@ def transform_query(query:str, older_conversation: List[Dict]):
     transformed_query = response.choices[0].message.content
     return transformed_query
     
+
+
+def classify_query(query:str):
+    
+    template = f"""
+        Query: {query}
+
+        Classifies the query into one of the predefined categories based on its content.
+
+        Categories:
+            - Normal Conversation: Casual greetings not specific to Dalai Lama or Tibet.
+            - Gibberish: Incoherent or nonsensical text.
+            - Genuine Query: Any valid question that seeks information or clarification.
+            - Inappropriate: Queries containing harmful, offensive, derogatory, sexual or otherwise inappropriate language. This includes queries with negative sentiment or illegal content.
+            - Non-English: Queries not written in English.
+
+
+        Returns:
+            str: The exact category of the query from the list above. The category should be returned exactly as mentioned, without any additional characters or quotes.
+
+    """
+    
+    qa_template = PromptTemplate(template)
+    prompt = qa_template.format(question=query)
+    
+    """ include the older conversation to make the model understand the context of the query transformation"""
+    messages=[{"role": "user", "content": prompt}]
+
+    response = client.chat.completions.create(
+         model="gpt-4-turbo",
+        messages=messages,
+        temperature=0.3,
+        
+    )
+    classified_query = response.choices[0].message.content
+    return classified_query
 
 
 

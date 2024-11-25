@@ -3,8 +3,8 @@ import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from config import load_vector_db
-from fetch_response import get_answer_for_query, transform_query
+from config import load_vector_db, GIBBERISH_QUERY_RESPONSE, INAPPROPRIATE_QUERY_RESPONSE, NON_ENGLISH_QUERY_RESPONSE
+from fetch_response import classify_query, transform_query, get_answer_for_genuine_query,  get_answer_for_normal_conversation 
 from fastapi.responses import StreamingResponse
 from typing import List, Dict
 class UserInput(BaseModel):
@@ -40,6 +40,29 @@ def get_threshold(similarity_scores) -> int:
 
 def generate_answer(query:str, older_conversation, num_of_context=10):
     query = query.replace('"', "'")
+    query_category = classify_query(query)
+    if query_category == "Gibberish":
+        for answer in GIBBERISH_QUERY_RESPONSE:
+            yield answer
+        return 
+
+    if query_category == "Inappropriate":
+        for answer in INAPPROPRIATE_QUERY_RESPONSE:
+            yield answer
+        return 
+    
+    if query_category == "Non-English":
+        for answer in NON_ENGLISH_QUERY_RESPONSE:
+            yield answer
+        return
+    
+    if query_category == "Normal Conversation":
+        for answer in  get_answer_for_normal_conversation(query):
+            yield answer 
+        return 
+
+    """ if the query is a genuine query, we will transform the query to make it more clear and concise"""
+
     query = transform_query(query, older_conversation)
     
     retriever = VECTOR_INDEX.as_retriever(similarity_top_k=num_of_context)
@@ -58,5 +81,5 @@ def generate_answer(query:str, older_conversation, num_of_context=10):
         context += f"Source: {context_metadata}\nSource context:{retrieved_node.get_content()} \n\n"
 
     
-    for output in get_answer_for_query(query=query, context=context):
+    for output in get_answer_for_genuine_query(query=query, context=context):
         yield output 

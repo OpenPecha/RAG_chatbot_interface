@@ -1,18 +1,21 @@
-import os 
-from llama_index.core.llms import ChatMessage
-from llama_index.llms.openai import OpenAI
+from openai import OpenAI
 
 
+client = OpenAI()
 
 def get_chatgpt_response(prompt):
-    api_key = os.getenv('OPENAI_API_KEY')
-    messages = [
-        ChatMessage(
-            role="system", content="You are his holiness the 14th Dalai Lama."
-        ),
-        ChatMessage(role="user", content=prompt),
-    ]
-    response = OpenAI(api_key=api_key).chat(messages)
-    answer = response.message.content 
-    return answer 
+    stream = client.chat.completions.create(
+         model="gpt-4-turbo",
+        messages=[
+            {"role": "system", "content": "You are his holiness the 14th Dalai Lama."},
+            {"role": "user", "content": prompt}],
+        temperature=0.3,
+        stream=True,
+    )
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            yield chunk.choices[0].delta.content
+
+
+
 

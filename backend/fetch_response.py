@@ -1,6 +1,8 @@
 from openai import OpenAI
 from llama_index.core import PromptTemplate
 from typing import List, Dict 
+
+
 client = OpenAI()
 
 def get_answer_for_genuine_query(query:str, context:str):
@@ -141,5 +143,6 @@ def classify_query(query:str):
     )
     classified_query = response.choices[0].message.content
     return classified_query
+
 
 

@@ -1,5 +1,6 @@
 from openai import OpenAI
 
+
 client = OpenAI()
 
 def get_chatgpt_response(prompt):
@@ -14,6 +15,7 @@ def get_chatgpt_response(prompt):
     for chunk in stream:
         if chunk.choices[0].delta.content is not None:
             yield chunk.choices[0].delta.content
+
 
 
 
